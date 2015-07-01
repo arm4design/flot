@@ -1,3 +1,10 @@
+
+## Flot 0.8.3-arm4 ##
+- Prototype based version created. This fork presents the flot.js plugin 
+ in a prototype-oriented way allowing to extend most of the private methods
+ from outside via plugins. Such extension can be done using the Internal 
+ static prototype.
+
 ## Flot 0.8.3 ##
 
 ### Changes ###

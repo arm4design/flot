@@ -1,5 +1,14 @@
 ## Frequently asked questions ##
 
+### Why this fork? ####
+Flot is pretty extensible via plugins but some logics from its core
+could block the developer to include new features or even modify
+the default features (like "autoHighlight") so this fork redefines
+the flot.js core as the (static) Internal prototype, allowing the 
+developer to modify / extend the core easily. This fork blocks any
+extension or modification from the runtime as well.
+In resume, more secure and versatile code for this useful plugin.
+
 #### How much data can Flot cope with? ####
 
 Flot will happily draw everything you send to it so the answer
