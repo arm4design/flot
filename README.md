@@ -10,8 +10,10 @@ developer to modify / extend the core easily. This fork blocks any
 extension or modification from the runtime as well.
 In resume, more secure and versatile code for this useful plugin.
 
-Check the original project at <https://github.com/flot/flot>.
+Check the original project at <https://github.com/flot/flot>
+
 Visit the original website at <http://www.flotcharts.org/>
+
 API at [API reference](API.md)
 
 
