@@ -1,143 +1,126 @@
 ## Writing plugins ##
 
-All you need to do to make a new plugin is creating an init function
-and a set of options (if needed), stuffing it into an object and
-putting it in the $.plot.plugins array. For example:
+This fork allows you to still using the same structure for plugins,
+as well as using old plugins. The main difference is that you can
+extend or modify the Internal prototype, which is passed as the
+second argument in plugin's init function.
+
+Check the original PLUGINS.md at <https://github.com/flot/flot/blob/master/PLUGINS.md>
+
+## Extending the core ##
+
+You can extend the Internal prototype doing
 
 ```js
-function myCoolPluginInit(plot) {
-    plot.coolstring = "Hello!";
+/**
+  * myCoolPlugin
+  */
+function myCoolPluginInit(plot, classes) {
+    // classes argument contains Canvas and Internal
+    var Internal = classes.Internal;
+    Internal.prototype.extension = function(arg) {
+        console.log("extension called with " + arg);
+    };
+    // in order to execute such method, use the "internal" instance in plot object
+    plot.internal.extension("argument");
 };
 
-$.plot.plugins.push({ init: myCoolPluginInit, options: { ... } });
-
-// if $.plot is called, it will return a plot object with the
-// attribute "coolstring"
 ```
 
-Now, given that the plugin might run in many different places, it's
-a good idea to avoid leaking names. The usual trick here is wrap the
-above lines in an anonymous function which is called immediately, like
-this: (function () { inner code ... })(). To make it even more robust
-in case $ is not bound to jQuery but some other Javascript library, we
-can write it as
+That plugin will print "extension called with argument" in your console.
+
+## Overriding a core method ##
+
+Say you need to execute the method above when highlighting a point (uh? why not? ;)),
+in such case you can do as follows
 
 ```js
-(function ($) {
-    // plugin definition
+/**
+  * myCoolPlugin
+  */
+function myCoolPluginInit(plot, classes) {
+    // classes argument contains Canvas and Internal
+    var Internal = classes.Internal;
+    Internal.prototype.extension = function(arg) {
+        console.log("extension called with " + arg);
+    };
+    // overrides the original method
+    Internal.prototype.drawPointHighlight = function(series, point) {
+        // the lines below are the original ones
+        var x = point[0], y = point[1],
+            axisx = series.xaxis, axisy = series.yaxis,
+            highlightColor = (typeof series.highlightColor === "string") ? series.highlightColor :             $.color.parse(series.color).scale('a', 0.5).toString();
+
+        if (x < axisx.min || x > axisx.max || y < axisy.min || y > axisy.max)
+            return;
+        
+        var pointRadius = series.points.radius + series.points.lineWidth / 2;
+        octx.lineWidth = pointRadius;
+        octx.strokeStyle = highlightColor;
+        var radius = 1.5 * pointRadius;
+        x = axisx.p2c(x);
+        y = axisy.p2c(y);
+
+        octx.beginPath();
+        if (series.points.symbol == "circle")
+            octx.arc(x, y, radius, 0, 2 * Math.PI, false);
+        else
+            series.points.symbol(octx, x, y, radius, false);
+        octx.closePath();
+        octx.stroke();
+        // and here we execute the new method
+        this.extension("argument");
+    };
+    
+};
+
+```
+
+You can use "this" keyword since you're already inside the instance.
+
+You could also face some compatibility issue writting any other plugin
+and need to add something to the .extension method. In such case do
+
+```js
+/**
+  * myReallyCoolPlugin
+  */
+function myReallyCoolPluginInit(plot, classes) {
+    // classes argument contains Canvas and Internal
+    var Internal = classes.Internal;
+    Internal.prototype.extension = function(arg) {
+        if (arg)
+            console.log("extension called with " + arg);
+        else
+            console.log("extension called without argument");
+    };
     // ...
-})(jQuery);
+};
+
 ```
 
-There's a complete example below, but you should also check out the
-plugins bundled with Flot.
+So, anytime the "myReallyCoolPlugin" is loaded after "myCoolPlugin" the
+.extension method will be checking for passed argument.
 
+This means: JUST TAKE CARE OF THE PLUGINS IMPLEMENTATION ORDER.
 
-## Complete example ##
-  
-Here is a simple debug plugin which alerts each of the series in the
-plot. It has a single option that control whether it is enabled and
-how much info to output:
+## When to use the Internal prototype ##
 
-```js
-(function ($) {
-    function init(plot) {
-        var debugLevel = 1;
+Easy, anytime you don't want to fork and change the flot.js code. Using
+the Internal prototype allows you to include those changes without creating
+your own fork.
 
-        function checkDebugEnabled(plot, options) {
-            if (options.debug) {
-                debugLevel = options.debug;
-                plot.hooks.processDatapoints.push(alertSeries);
-            }
-        }
+## Why use the Internal prototype ##
 
-        function alertSeries(plot, series, datapoints) {
-            var msg = "series " + series.label;
-            if (debugLevel > 1) {
-                msg += " with " + series.data.length + " points";
-                alert(msg);
-            }
-        }
+Most of the modifications you would like to include in flot.js could be done
+using the traditional plugins approach, but in several cases you will be
+overriding default features which means to deploy the original feature and
+after that, deploy the plugin feature. Using Internal you will get your Flot
+implementation much lighter.
 
-        plot.hooks.processOptions.push(checkDebugEnabled);
-    }
+## Code encapsulation and security considerations ##
 
-    var options = { debug: 0 };
-      
-    $.plot.plugins.push({
-        init: init,
-        options: options,
-        name: "simpledebug",
-        version: "0.1"
-    });
-})(jQuery);
-```
-
-We also define "name" and "version". It's not used by Flot, but might
-be helpful for other plugins in resolving dependencies.
-  
-Put the above in a file named "jquery.flot.debug.js", include it in an
-HTML page and then it can be used with:
-
-```js
-    $.plot($("#placeholder"), [...], { debug: 2 });
-```
-
-This simple plugin illustrates a couple of points:
-
- - It uses the anonymous function trick to avoid name pollution.
- - It can be enabled/disabled through an option.
- - Variables in the init function can be used to store plot-specific
-   state between the hooks.
-
-The two last points are important because there may be multiple plots
-on the same page, and you'd want to make sure they are not mixed up.
-
-
-## Shutting down a plugin ##
-
-Each plot object has a shutdown hook which is run when plot.shutdown()
-is called. This usually mostly happens in case another plot is made on
-top of an existing one.
-
-The purpose of the hook is to give you a chance to unbind any event
-handlers you've registered and remove any extra DOM things you've
-inserted.
-
-The problem with event handlers is that you can have registered a
-handler which is run in some point in the future, e.g. with
-setTimeout(). Meanwhile, the plot may have been shutdown and removed,
-but because your event handler is still referencing it, it can't be
-garbage collected yet, and worse, if your handler eventually runs, it
-may overwrite stuff on a completely different plot.
-
- 
-## Some hints on the options ##
-   
-Plugins should always support appropriate options to enable/disable
-them because the plugin user may have several plots on the same page
-where only one should use the plugin. In most cases it's probably a
-good idea if the plugin is turned off rather than on per default, just
-like most of the powerful features in Flot.
-
-If the plugin needs options that are specific to each series, like the
-points or lines options in core Flot, you can put them in "series" in
-the options object, e.g.
-
-```js
-var options = {
-    series: {
-        downsample: {
-            algorithm: null,
-            maxpoints: 1000
-        }
-    }
-}
-```
-
-Then they will be copied by Flot into each series, providing default
-values in case none are specified.
-
-Think hard and long about naming the options. These names are going to
-be public API, and code is going to depend on them if the plugin is
-successful.
+It's true that using the Internal prototype, it can be accessed in runtime
+since Plot instance contains an Internal instance. Don't be worried about
+possible hacks in runtime cause those instances are inmutables once are
+instantiated.
