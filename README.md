@@ -16,6 +16,26 @@ Visit the original website at <http://www.flotcharts.org/>
 
 API at [API reference](API.md)
 
+## When to use the Internal prototype ##
+
+Easy, anytime you don't want to fork and change the flot.js code. Using
+the Internal prototype allows you to include those changes without creating
+your own fork.
+
+## Why use the Internal prototype (again) ##
+
+Most of the modifications you would like to include in flot.js could be done
+using the traditional plugins approach, but in several cases you will be
+overriding default features which means to deploy the original feature and
+after that, deploy the plugin feature. Using Internal you will get your Flot
+implementation much lighter.
+
+## Code encapsulation and security considerations ##
+
+It's true that using the Internal prototype, it can be accessed in runtime
+since Plot instance contains an Internal instance. Don't be worried about
+possible hacks in runtime cause those instances are inmutables once are
+instantiated.
 
 ## Installation ##
 
@@ -88,7 +108,6 @@ $.plot($("#placeholder"), [ [[0, 0], [1, 1]] ], { yaxis: { max: 1 } });
 
 The plot function immediately draws the chart and then returns a plot
 object with a couple of methods.
-
 
 [excanvas]: http://code.google.com/p/explorercanvas/
 [flashcanvas]: http://code.google.com/p/flashcanvas/
