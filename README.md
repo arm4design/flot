@@ -1,13 +1,18 @@
 # Flot [![Build status](https://travis-ci.org/flot/flot.png)](https://travis-ci.org/flot/flot)
 
-## About ##
+## Why this fork? ##
 
-Flot is a Javascript plotting library for jQuery.  
-Read more at the website: <http://www.flotcharts.org/>
+Flot is pretty extensible via plugins but some logics from its core
+could block the developer to include new features or even modify
+the default features (like "autoHighlight") so this fork redefines
+the flot.js core as the (static) Internal prototype, allowing the 
+developer to modify / extend the core easily. This fork blocks any
+extension or modification from the runtime as well.
+In resume, more secure and versatile code for this useful plugin.
 
-Take a look at the the examples in examples/index.html; they should give a good
-impression of what Flot can do, and the source code of the examples is probably
-the fastest way to learn how to use Flot.
+Check the original project at <https://github.com/flot/flot>.
+Visit the original website at <http://www.flotcharts.org/>
+API at [API reference](API.md)
 
 
 ## Installation ##
@@ -83,28 +88,5 @@ The plot function immediately draws the chart and then returns a plot
 object with a couple of methods.
 
 
-## What's with the name? ##
-
-First: it's pronounced with a short o, like "plot". Not like "flawed".
-
-So "Flot" rhymes with "plot".
-
-And if you look up "flot" in a Danish-to-English dictionary, some of
-the words that come up are "good-looking", "attractive", "stylish",
-"smart", "impressive", "extravagant". One of the main goals with Flot
-is pretty looks.
-
-
-## Notes about the examples ##
-
-In order to have a useful, functional example of time-series plots using time
-zones, date.js from [timezone-js][timezone-js] (released under the Apache 2.0
-license) and the [Olson][olson] time zone database (released to the public
-domain) have been included in the examples directory.  They are used in
-examples/axes-time-zones/index.html.
-
-
 [excanvas]: http://code.google.com/p/explorercanvas/
 [flashcanvas]: http://code.google.com/p/flashcanvas/
-[timezone-js]: https://github.com/mde/timezone-js
-[olson]: http://ftp.iana.org/time-zones
