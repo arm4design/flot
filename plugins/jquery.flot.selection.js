@@ -99,7 +99,7 @@ The plugin allso adds the following methods to the plot object:
             if (selection.active) {
                 updateSelection(e);
                 
-                plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
+                plot.getPlaceholder().trigger("plotselecting", [ {left: e.pageX, top: e.pageY}, getSelection() ]);
             }
         }
 
@@ -304,7 +304,6 @@ The plugin allso adds the following methods to the plot object:
                 eventHolder.mousedown(onMouseDown);
             }
         });
-
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
             // draw selection

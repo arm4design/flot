@@ -2512,11 +2512,6 @@ function Plot(placeholder, data_, options_, plugins){
         plotBars(series.datapoints, barLeft, barLeft + series.bars.barWidth, fillStyleCallback, series.xaxis, series.yaxis);
         ctx.restore();
     };
-   /* Internal.prototype.executeHooks = function(hook, args) {
-        args = [plot].concat(args);
-        for (var i = 0; i < hook.length; ++i)
-            hook[i].apply(this, args);
-    };*/
     var internal = new Internal();
     // -- Internal END -- //
     
@@ -3031,13 +3026,21 @@ function Plot(placeholder, data_, options_, plugins){
             enumerable: true, writable: false, configurable: false
         },
         options: {
-            get: function(){ return options; },
+            get: function(){ return options; }
         },
         xaxes: { 
             get: function(){ return xaxes; },
+            set: function(min, max){
+                if( min ) xaxes.min = min;
+                if( max ) xaxes.max = max;
+            }
         },
         yaxes: { 
             get: function(){ return yaxes; },
+            set: function(min, max){
+                if( min ) yaxes.min = min;
+                if( max ) yaxes.max = max;
+            }
         },
         series: {
             get: function(){ return series; },
@@ -3045,26 +3048,26 @@ function Plot(placeholder, data_, options_, plugins){
                 series = parseData(data);
                 this.internal.fillInSeriesOptions();
                 this.internal.processData();
-            },
+            }
         },
         highlights: {
             get: function(){ return highlights; },
-            set: function(h){ highlights = h; },
+            set: function(h){ highlights = h; }
         },
         hooks: {
-            get: function(){ return hooks; },
+            get: function(){ return hooks; }
         },
         surface: {
-            get: function(){ return surface; },
+            get: function(){ return surface; }
         },
         overlay: {
-            get: function(){ return overlay; },
+            get: function(){ return overlay; }
         },
         eventHolder: {
-            get: function(){ return eventHolder; },
+            get: function(){ return eventHolder; }
         },
         plotOffset: { 
-            get: function(){ return plotOffset; },
+            get: function(){ return plotOffset; }
         },
         plotWidth: {
             get: function(){ return plotWidth; },
@@ -3099,28 +3102,32 @@ function Plot(placeholder, data_, options_, plugins){
     plot.setupGrid();
     plot.draw();
     bindEvents();
-    
+
     // freeze objects
-    //Object.freeze(surface);
-    //Object.freeze(overlay);
+    Object.seal(surface);
+    Object.seal(overlay);
     Object.freeze(internal);
     Object.freeze(plot);
+    
 };
 // Public methods
 Plot.prototype.draw = function(){
     this.drawer;
+    return this;
 };
 Plot.prototype.getOptions = function(){
     return this.options;
 };
 Plot.prototype.setData = function(data){
     this.series = data;
+    return this;
 };
 Plot.prototype.getData = function(){
     return this.series;
 };
 Plot.prototype.setupGrid = function(){
     this.gridSetup;
+    return this;
 };
 Plot.prototype.getPlaceholder = function(){
     return this.placeholder;
@@ -3159,9 +3166,11 @@ Plot.prototype.getAxes = function(){
 };
 Plot.prototype.highlight = function(s, point) {
     this.internal.highlight(s, point);
+    return this;
 };
 Plot.prototype.unhighlight = function(s, point){
     this.internal.unhighlight(s, point);
+    return this;
 };
 Plot.prototype.indexOfHighlight = function(s, p){
     var highlights = this.highlights;
@@ -3175,19 +3184,22 @@ Plot.prototype.indexOfHighlight = function(s, p){
 };
 Plot.prototype.triggerRedrawOverlay = function(){
     this.internal.triggerRedrawOverlay();
+    return this;
 };
 Plot.prototype.pointOffset = function(point){
     var plot = this, axisNumber = this.internal.axisNumber;
     return {
-        left: parseInt(xaxes[axisNumber(point, "x") - 1].p2c(+point.x) + plot.plotOffset.left, 10),
-        top: parseInt(yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plot.plotOffset.top, 10)
+        left: parseInt(plot.xaxes[axisNumber(point, "x") - 1].p2c(+point.x) + plot.plotOffset.left, 10),
+        top: parseInt(plot.yaxes[axisNumber(point, "y") - 1].p2c(+point.y) + plot.plotOffset.top, 10)
     };
 };
 Plot.prototype.shutdown = function(){
     this.shutdowner;
+    return this;
 };
 Plot.prototype.destroy = function(){
     this.destroyer;
+    return this;
 };
 Plot.prototype.resize = function(){
     var width = this.placeholder.width(),
