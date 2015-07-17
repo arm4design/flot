@@ -16,6 +16,8 @@ Visit the original website at <http://www.flotcharts.org/>
 
 API at [API reference](API.md)
 
+This fork code at <https://github.com/arm4design/flot>
+
 ## When to use the Internal prototype ##
 
 Easy, anytime you don't want to fork and change the flot.js code. Using

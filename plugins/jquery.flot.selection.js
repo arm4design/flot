@@ -98,7 +98,6 @@ The plugin allso adds the following methods to the plot object:
         function onMouseMove(e) {
             if (selection.active) {
                 updateSelection(e);
-                
                 plot.getPlaceholder().trigger("plotselecting", [ {left: e.pageX, top: e.pageY}, getSelection() ]);
             }
         }

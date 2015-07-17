@@ -3210,7 +3210,7 @@ Plot.prototype.resize = function(){
 Plot.prototype.c2p = function(pos){
     return this.internal.canvasToAxisCoords(pos);
 };
-Plot.prototype.p2c = function(){
+Plot.prototype.p2c = function(pos){
     return this.internal.axisToCanvasCoords(pos);
 };
 
